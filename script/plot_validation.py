@@ -331,20 +331,11 @@ class DataPlot:
             plt.plot(fhrs, da2_gefs, color="blue", linestyle="--", linewidth=1.5)
             plt.plot(fhrs, da2_aigefs, color="red", linestyle="--", linewidth=1.5)
         if self.stype=='MER':
-            plt.title(f"Global {var_name} \n"
-                      f"Ensemble Mean Error and Ensemble Abs. Error\n"
-                      f"Average For {self.sdate}",
-                      fontsize=12, fontweight="bold")
+            plt.title(f"Global {var_name} \nEnsemble Mean Error and Ensemble Abs. Error\nAverage For {self.sdate}", fontsize=12, fontweight="bold")
         if self.stype=='RMSE':
-            plt.title(f"Global {var_name} \n"
-                      f"Ensemble Mean RMSE and Ensemble SPREAD\n"
-                      f"Average For {self.sdate}",
-                      fontsize=12, fontweight="bold")
+            plt.title(f"Global {var_name} \nEnsemble Mean RMSE and Ensemble SPREAD\nAverage For {self.sdate}",fontsize=12, fontweight="bold")
         if  self.stype=='CRPS':
-            plt.title(f"Global {var_name} \n"
-                      f"Continuous Ranked Probability Score\n"
-                      f"Average For {self.sdate}",
-                      fontsize=12, fontweight="bold")
+            plt.title(f"Global {var_name} \nContinuous Ranked Probability Score\nAverage For {self.sdate}",fontsize=12, fontweight="bold")
         plt.xlabel("Forecast hours", fontsize=12)
         plt.ylabel(ylabs, fontsize=12)
         plt.xticks(np.arange(0, 241, 24))
@@ -352,10 +343,23 @@ class DataPlot:
         if self.stype=='MER':
             plt.ylim(-2, 4)
         if self.stype=='RMSE':
-            plt.ylim(0, 4)
+            plt.ylim(0, 5)
         if self.stype=='CRPS':
-            plt.ylim(0, 4)
-        
+            plt.ylim(0, 5)
+       
+        if (var_name=='u_250') | (var_name=='v_250'):
+            if self.stype=='MER':
+                plt.ylim(-2, 12)
+            if self.stype=='RMSE':
+                plt.ylim(0, 15)
+            if self.stype=='CRPS':
+                plt.ylim(0, 10)
+        if (var_name=='u_850') | (var_name=='v_850'):
+            if self.stype=='MER':
+                plt.ylim(-2, 6)
+            if self.stype=='RMSE':
+                plt.ylim(0, 8)
+
         plt.xlim(0, 240)
         plt.legend(labs, loc="upper left", fontsize=10)
         plt.tick_params(labelsize=11, direction="in", length=6, width=1.2)
@@ -428,7 +432,7 @@ for fh in np.arange(0,lead_time+1,6):
     Rsta_lt['GEFS_MER'].append(gefs_stas['MER'])
     Rsta_lt['GEFS_MAER'].append(gefs_stas['MAER'])
     Rsta_lt['GEFS_RMSE'].append(gefs_stas['RMSE'])
-    Rsta_lt['GEFS_CRPS'].append(np.nanmean(gefs_stas['RMSE']))
+    Rsta_lt['GEFS_CRPS'].append(np.nanmean(gefs_stas['CRPS']))
     Rsta_lt['GEFS_SPRD'].append(np.nanmean(gefs_stas['SPRD']))
     del process_statics;
  
@@ -464,9 +468,14 @@ for fh in np.arange(0,lead_time+1,6):
     # process_plot = DataPlot(aigefs_stas,var,conf,lons,lats,sdate,fh,'aigefs',plot_path,'SPRD',pl); process_plot.plot_values(); del process_plot    
 
 
+#print(np.max(Rsta_lt['GEFS_MER']))
+#print(np.max(Rsta_lt['GEFS_MAER']))
+#print(np.max(Rsta_lt['GEFS_RMSE']))
+#print(np.max(Rsta_lt['GEFS_CRPS']))
+
 # plot region mean of mer/maer/rmse/spread/crps for ensemble forecasts
-process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'MER',pl); process_plot.plot_times(); del process_plot 
-process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'RMSE',pl); process_plot.plot_times(); del process_plot
+#process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'MER',pl); process_plot.plot_times(); del process_plot 
+#process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'RMSE',pl); process_plot.plot_times(); del process_plot
 process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'CRPS',pl); process_plot.plot_times(); del process_plot
 
 
