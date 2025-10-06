@@ -332,19 +332,19 @@ class DataPlot:
             plt.plot(fhrs, da2_aigefs, color="red", linestyle="--", linewidth=1.5)
         if self.stype=='MER':
             plt.title(f"Global {var_name} \n"
-                     "Ensemble Mean Error and Ensemble Abs. Error\n"
-                     "Average For {self.sdate}",
-                     fontsize=12, fontweight="bold")
+                      f"Ensemble Mean Error and Ensemble Abs. Error\n"
+                      f"Average For {self.sdate}",
+                      fontsize=12, fontweight="bold")
         if self.stype=='RMSE':
             plt.title(f"Global {var_name} \n"
-                     "Ensemble Mean RMSE and Ensemble SPREAD\n"
-                     "Average For {self.sdate}",
-                     fontsize=12, fontweight="bold")
+                      f"Ensemble Mean RMSE and Ensemble SPREAD\n"
+                      f"Average For {self.sdate}",
+                      fontsize=12, fontweight="bold")
         if  self.stype=='CRPS':
             plt.title(f"Global {var_name} \n"
-                     "Continuous Ranked Probability Score\n"
-                     "Average For {self.sdate}",
-                     fontsize=12, fontweight="bold")
+                      f"Continuous Ranked Probability Score\n"
+                      f"Average For {self.sdate}",
+                      fontsize=12, fontweight="bold")
         plt.xlabel("Forecast hours", fontsize=12)
         plt.ylabel(ylabs, fontsize=12)
         plt.xticks(np.arange(0, 241, 24))
