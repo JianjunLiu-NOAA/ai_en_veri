@@ -308,6 +308,7 @@ class DataPlot:
             da1_aigefs = self.xvals['AIGEFS_MER']
             da2_gefs = self.xvals['GEFS_MAER']
             da2_aigefs = self.xvals['AIGEFS_MAER']
+            maxy =np.ceil(np.max(np.array( [np.nanmax(da2_gefs),np.nanmax(da2_aigefs)] )))
             ylabs = "MERR(solid) and ABS. ERR(dash)"
             ffig = f"{self.plot_path}/GEFS_Ens_{var_name}_MER_MAER_{self.sdate}.png"
         if self.stype=='RMSE':
@@ -315,11 +316,13 @@ class DataPlot:
             da1_aigefs = self.xvals['AIGEFS_RMSE']
             da2_gefs = self.xvals['GEFS_SPRD']
             da2_aigefs = self.xvals['AIGEFS_SPRD']
+            maxy = np.ceil(np.max(np.array( [np.nanmax(da1_gefs),np.nanmax(da1_aigefs),np.nanmax(da2_gefs),np.nanmax(da2_aigefs)] )))
             ylabs = "RMSE(solid) and SPREAD(dash)"
             ffig = f"{self.plot_path}/GEFS_Ens_{var_name}_RMSE_SPREAD_{self.sdate}.png"
         if self.stype=='CRPS':
             da1_gefs = self.xvals['GEFS_CRPS']
             da1_aigefs = self.xvals['AIGEFS_CRPS']
+            maxy =np.ceil(np.max(np.array( [np.nanmax(da1_gefs),np.nanmax(da1_aigefs)] )))
             ylabs = "CRPS"
             ffig = f"{self.plot_path}/GEFS_Ens_{var_name}_CRPS_{self.sdate}.png"
 
@@ -341,25 +344,12 @@ class DataPlot:
         plt.xticks(np.arange(0, 241, 24))
         plt.grid(True, linestyle=":", linewidth=0.7)
         if self.stype=='MER':
-            plt.ylim(-2, 4)
-        if self.stype=='RMSE':
-            plt.ylim(0, 5)
-        if self.stype=='CRPS':
-            plt.ylim(0, 5)
+            plt.ylim(-2, maxy)
+            if self.var=='z':
+                plt.ylim(-20, maxy)
+        else:
+            plt.ylim(0, maxy)
        
-        if (var_name=='u_250') | (var_name=='v_250'):
-            if self.stype=='MER':
-                plt.ylim(-2, 12)
-            if self.stype=='RMSE':
-                plt.ylim(0, 15)
-            if self.stype=='CRPS':
-                plt.ylim(0, 10)
-        if (var_name=='u_850') | (var_name=='v_850'):
-            if self.stype=='MER':
-                plt.ylim(-2, 6)
-            if self.stype=='RMSE':
-                plt.ylim(0, 8)
-
         plt.xlim(0, 240)
         plt.legend(labs, loc="upper left", fontsize=10)
         plt.tick_params(labelsize=11, direction="in", length=6, width=1.2)
@@ -419,6 +409,12 @@ for fh in np.arange(0,lead_time+1,6):
     gefs_val = data_processor.read_gefs()
     aigefs_val = data_processor.read_aigefs()
     
+    if var=='z':  # convert the Geopotential to Geopotential Height
+        gdas_val = gdas_val/9.80665
+        gfs_val = gfs_val/9.80665
+        gefs_val = gefs_val/9.80665
+        aigefs_val = aigefs_val/9.80665
+
     # calculating statics
     process_statics = DataStatics(gfs_val,gdas_val,lats,'gfs',clim=None)
     gfs_stas = process_statics.cal_statics();
@@ -467,15 +463,9 @@ for fh in np.arange(0,lead_time+1,6):
     # process_plot = DataPlot(gefs_stas,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'SPRD',pl); process_plot.plot_values(); del process_plot
     # process_plot = DataPlot(aigefs_stas,var,conf,lons,lats,sdate,fh,'aigefs',plot_path,'SPRD',pl); process_plot.plot_values(); del process_plot    
 
-
-#print(np.max(Rsta_lt['GEFS_MER']))
-#print(np.max(Rsta_lt['GEFS_MAER']))
-#print(np.max(Rsta_lt['GEFS_RMSE']))
-#print(np.max(Rsta_lt['GEFS_CRPS']))
-
 # plot region mean of mer/maer/rmse/spread/crps for ensemble forecasts
-#process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'MER',pl); process_plot.plot_times(); del process_plot 
-#process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'RMSE',pl); process_plot.plot_times(); del process_plot
+process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'MER',pl); process_plot.plot_times(); del process_plot 
+process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'RMSE',pl); process_plot.plot_times(); del process_plot
 process_plot = DataPlot(Rsta_lt,var,conf,lons,lats,sdate,fh,'gefs',plot_path,'CRPS',pl); process_plot.plot_times(); del process_plot
 
 
