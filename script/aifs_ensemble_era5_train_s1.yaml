@@ -1,0 +1,118 @@
+defaults:
+- data: zarr
+- dataloader: native_grid
+- datamodule: ens
+- diagnostics: evaluation
+- hardware: slurm
+- graph: encoder_decoder_only
+- model: transformer_ens
+- training: ensemble
+- _self_
+
+config_validation: True
+
+dataloader:
+  num_workers:
+    training: 1
+    validation: 1
+    test: 1
+  # global_batch_size = num_nodes * num_gpus_per_node * batch_size / num_gpus_per_model
+  batch_size:
+    training: 1
+    validation: 1
+    test: 1    
+  training:
+    start: 2003
+    end: 2017
+    drop: ['slor','standard_deviation_of_orography','tcc','tcwv','tisr']
+    rename: {"round_land_sea_mask": "lsm"}
+  validation:
+    start: 2018
+    end: 2020
+    drop: ['slor','standard_deviation_of_orography','tcc','tcwv','tisr']
+    rename: {"round_land_sea_mask": "lsm"}
+  test:
+    start: 2021
+    end: 2021
+    drop: ['slor','standard_deviation_of_orography','tcc','tcwv','tisr']
+    rename: {"round_land_sea_mask": "lsm"}
+  limit_batches:
+    training: null
+    validation: null
+   
+diagnostics:
+  plot:
+    callbacks: []
+ 
+hardware:
+  paths:
+    output: ./aifs/training-output/
+    data: /scratch3/NAGAPE/gpu-ai4wp/Jianjun.Liu/data/era5
+    graph: /scratch3/NAGAPE/gpu-ai4wp/Jianjun.Liu/data/era5
+  files:
+    dataset: ufs2arco_era5_2003_2021_1p00_L13.zarr
+  num_gpus_per_ensemble: 1
+  num_gpus_per_model: 1
+
+model:
+  bounding:
+    - _target_: anemoi.models.layers.bounding.ReluBounding #[0, infinity)
+      variables:
+      - tp
+      - q_50
+      - q_100
+      - q_150
+      - q_200
+      - q_250
+      - q_300
+      - q_400
+      - q_500
+      - q_600
+      - q_700
+      - q_850
+      - q_925
+      - q_1000  
+
+graph:
+  nodes:
+    hidden:
+      node_builder:
+        _target_: anemoi.graphs.nodes.ReducedGaussianGridNodes 
+        grid: o48 # o48, o96, n320...
+  attributes:
+    nodes:
+      area_weight:
+        _target_: anemoi.graphs.nodes.attributes.IsolatitudeAreaWeights  # SphericalAreaWeights; IsolatitudeAreaWeights / no fill_value
+        norm: unit-max
+        # fill_value: 0
+        
+training:
+  #run_id: 3730a20f-52b0-4f47-9d6b-3605aabf5b69
+  
+  ensemble_size_per_device: 10
+  max_epochs: null
+  max_steps: 300000
+
+  training_loss:
+    alpha: 0.95  
+  validation_metrics:
+    fkcrps:
+      alpha: 0.95
+  
+  rollout:
+    start: 1
+    epoch_increment: 0
+    max: 1
+    
+  lr:
+    warmup: 1000 
+    rate: 2.5e-4  # 1.0e-3
+    iterations: ${training.max_steps} # NOTE: When max_epochs < max_steps, scheduler will run for max_steps
+    min: 0.0
+
+  optimizer:
+    zero: False
+    kwargs:
+      betas: [0.9, 0.95]
+      weight_decay: 0.1
+
